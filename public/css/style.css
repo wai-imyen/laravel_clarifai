@@ -1,0 +1,18 @@
+body{
+
+	font-family: '微軟正黑體';
+	
+}
+
+.index
+{
+	font-size: 18px;
+}
+
+li{
+	margin-bottom: 10px;
+}
+
+a{
+	color: #337ab7;
+}
