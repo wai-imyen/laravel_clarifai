@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\Config;
 use PhpFanatic\clarifAI\ImageClient;
+
+include(app_path().'/system/function.php');
 
 class FeatrueController extends Controller
 {   
@@ -73,6 +74,40 @@ class FeatrueController extends Controller
         }
 
         return view('recognite_image', ['show' => $show, 'image' => $image]);
+
+    }
+
+    /**
+     * 訓練模組
+     *
+     */
+    public function train()
+    {
+        $model_id = (isset($_GET['model_id'])) ? $_GET['model_id'] : '' ;
+
+        if ($model_id) 
+        {   
+            $myclient = new ImageClient(Config::get('my_config.clarifai_app_key'));    // Ktrees clarifai
+
+            // Train Model (model_id)
+            $response = $myclient->ModelTrain($model_id);
+
+            // 回傳狀態
+            $response_status = json_decode($response)->status->description;
+
+            if ($response_status == 'Ok')
+            {   
+                AlertWindow('/', $alertMessage = '訓練成功！');
+            }
+            else
+            {
+                AlertWindow('/train', $alertMessage = '訓練失敗！');
+            }
+        }
+        else
+        {
+            return view('train');
+        }
 
     }
 
