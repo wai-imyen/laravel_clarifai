@@ -31,3 +31,5 @@ Route::view('use', 'use_method');
 Route::get('recognite', 'FeatrueController@recognite');
 
 Route::get('train', 'FeatrueController@train');
+
+Route::get('search', 'FeatrueController@search');

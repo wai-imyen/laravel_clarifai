@@ -31,7 +31,8 @@ class FeatrueController extends Controller
             $response = $myclient->Predict('類型');
             $response = json_decode($response);
             
-            $image_concepts = $response->outputs[0]->data->concepts;    // 圖片 Concept 參數資料
+            // 圖片 Concept 參數資料
+            $image_concepts = $response->outputs[0]->data->concepts;    
 
             $show .= '<div class="col-md-2">';
             $show .= '<h4>服飾類型</h4> <br />';
@@ -109,6 +110,74 @@ class FeatrueController extends Controller
             return view('train');
         }
 
+    }
+
+
+    /**
+     * 搜尋圖片
+     *
+     */
+    public function search()
+    {
+        $image = (isset($_GET['image'])) ? $_GET['image'] : '' ;
+        $brand = (isset($_GET['brand'])) ? $_GET['brand'] : '' ;
+        $show  = '';
+        $count = 1;
+
+        if ($image) 
+        {
+            // Search
+            $myclient = new ImageClient(Config::get('my_config.clarifai_app_key'));    
+
+            // 搜尋相似於 $image 的圖片
+            $response = $myclient->Search($image, 'image');      
+            $response = json_decode($response);
+
+            foreach ($response->hits as $key => $val) 
+            {   
+                // 圖片網址
+                $similar_image_url = $val->input->data->image->url; 
+
+                // 圖片 Meta 參數資料
+                $image_meta = $val->input->data->metadata;  
+
+                // 搜尋品牌
+                if ($brand) 
+                {   
+                    if (isset($image_meta->brand) && $image_meta->brand == $brand) 
+                    {
+                        $show .= ( ( $count % 6 ) == 1) ? '<div class="row">' : '' ;
+
+                        $show .= '  
+                                <div class="col-md-2">
+                                    <img src="'.$similar_image_url.'" alt="" width=100 >
+                                </div>
+                        ';
+
+                        $show .= ( ( $count % 6 ) == 0) ? '</div>' : '' ;
+
+                        $count ++;
+                    }
+
+                }
+                else
+                {   
+                    $show .= ( ( $count % 6 ) == 1) ? '<div class="row">' : '' ;
+
+                    $show .= '  
+                            <div class="col-md-2">
+                                <img src="'.$similar_image_url.'" alt="" width=100 >
+                            </div>
+                    ';
+
+                    $show .= ( ( $count % 6 ) == 0) ? '</div>' : '' ;
+                    
+                    $count ++;
+                }
+            }
+        }
+
+        return view('search_image', ['show' => $show, 'image' => $image, 'brand' => $brand]);
     }
 
     /**
